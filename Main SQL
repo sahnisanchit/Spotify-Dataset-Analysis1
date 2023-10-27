@@ -1,0 +1,54 @@
+    select * from spotify
+
+SELECT COUNT(*)
+FROM spotify
+WHERE streams IS NULL OR SPOTIFY."artist(s)_name" IS NULL;
+
+SELECT
+LOWER(track_name) AS track_name,
+LOWER("artist(s)_name") AS artist_name,
+artist_count,
+released_year,
+released_month,
+released_day,
+in_spotify_playlists,
+in_spotify_charts,
+CAST(streams AS INT64) AS streams,
+"danceability_%" AS danceability 
+FROM SPOTIFY;
+
+SELECT 
+  "artist(s)_name"
+  , COUNT(*) as song_count
+FROM spotify
+WHERE released_year = "2023"
+GROUP BY "artist(s)_name"
+ORDER BY song_count DESC
+LIMIT 1;
+
+
+#Quesiton two: What is the average number of streams for songs released in each month of 2023?
+
+select "artist(s)_name",released_month,count(*) as "artist(s)_name" from spotify
+where released_year="2023"
+group by "artist(s)_name"
+order by "artist(s)_name"
+
+#Question four: What percentage of songs in the 'Top Spotify Songs 2023' were actually released in 2023?
+
+with songcounts as 
+(select count(*) as total_count, sum(case when released_year="2023" then 1 else 0 end) as count_2023 from spotify)
+select 
+(count_2023*100/total_count) as percentage_released_in_2023 from songcounts;
+
+SELECT
+(CASE
+WHEN "danceability_%" <= 25 THEN '0-25%'
+WHEN "danceability_%" <= 50 THEN '26-50%'
+WHEN "danceability_%" <= 75 THEN '51-75%'
+ELSE '76-100%'
+END) AS danceability_group,
+AVG(SAFE_CAST(streams)) as avg_streams
+FROM spotify
+GROUP BY danceability_group
+ORDER BY avg_streams DESC;
